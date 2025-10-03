@@ -1,0 +1,10 @@
+Flask>=3.0.0
+pandas>=1.5.0
+openpyxl>=3.1.0
+yfinance>=0.2.0
+pyautogui>=0.9.50
+pywin32>=306
+psutil>=5.9.0
+numpy>=1.24.0
+ta>=0.11.0
+pandas-ta>=0.3.14b0

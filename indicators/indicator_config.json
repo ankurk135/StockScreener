@@ -1,0 +1,36 @@
+{
+  "active_indicators": {
+    "price": [
+      "Price",
+      "Price_1D_Change_Pct",
+      "Price_5D_Change_Pct",
+      "Price_11D_Change_Pct",
+      "TrailingPE",
+      "52WeekHigh",
+      "52WeekLow",
+      "5YearHigh",
+      "5YearLow"
+    ],
+    "trend": [
+      "SMA50_1D",
+      "SMA200_1D",
+      "SMA200_1W",
+      "SMA50_1D_AwayFromPrice_Pct",
+      "SMA200_1D_AwayFromPrice_Pct"
+    ],
+    "momentum": [
+      "RSI_1D",
+      "RSI_1W"
+    ]
+  },
+  "indicator_settings": {
+    "RSI_period": 14,
+    "SMA50_period": 50,
+    "SMA200_period": 200,
+    "MACD_fast": 12,
+    "MACD_slow": 26,
+    "MACD_signal": 9,
+    "SuperTrend_period": 10,
+    "SuperTrend_multiplier": 3.0
+  }
+}
