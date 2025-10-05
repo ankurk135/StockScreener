@@ -4,310 +4,270 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stock Screener</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .header h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-        
-        .controls {
-            padding: 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .status-text {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        
-        .message {
-            margin: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            display: none;
-        }
-        
-        .message.show {
-            display: block;
-        }
-        
-        .message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            display: none;
-        }
-        
-        .loading.show {
-            display: block;
-        }
-        
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
-        }
-        
-        th {
-            background: #f8f9fa;
-            font-weight: 600;
-            cursor: pointer;
-            user-select: none;
-        }
-        
-        th:hover {
-            background: #e9ecef;
-        }
-        
-        tr:hover {
-            background: #f8f9fa;
-        }
-        
-        .stock-name {
-            color: #667eea;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        .stock-name:hover {
-            text-decoration: underline;
-        }
-    </style>
+    
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    
+    <link rel="stylesheet" href="/static/css/screener.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>Stock Screener</h1>
-            <p>Technical Analysis Dashboard</p>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <div class="navbar-brand">Stock Screener</div>
+            <div class="navbar-actions">
+                <button class="nav-btn primary" onclick="refreshData()" id="refreshBtn">
+                    Refresh Data
+                </button>
+                <div class="columns-dropdown">
+                    <button class="nav-btn" onclick="toggleColumnsMenu()">
+                        Columns
+                    </button>
+                    <div class="columns-menu" id="columnsMenu">
+                        <div class="column-item">
+                            <input type="checkbox" id="toggle-price" checked onchange="toggleColumnGroup('price')">
+                            <label for="toggle-price">Price Metrics (9)</label>
+                        </div>
+                        <div class="column-item">
+                            <input type="checkbox" id="toggle-trend" checked onchange="toggleColumnGroup('trend')">
+                            <label for="toggle-trend">Trend Indicators (8)</label>
+                        </div>
+                        <div class="column-item">
+                            <input type="checkbox" id="toggle-momentum" checked onchange="toggleColumnGroup('momentum')">
+                            <label for="toggle-momentum">Momentum (8)</label>
+                        </div>
+                        <div class="column-item">
+                            <input type="checkbox" id="toggle-volume" checked onchange="toggleColumnGroup('volume')">
+                            <label for="toggle-volume">Volume (6)</label>
+                        </div>
+                        <div class="column-item">
+                            <input type="checkbox" id="toggle-money-flow" checked onchange="toggleColumnGroup('money-flow')">
+                            <label for="toggle-money-flow">Money Flow (4)</label>
+                        </div>
+                        <div class="column-item">
+                            <input type="checkbox" id="toggle-strength" checked onchange="toggleColumnGroup('strength')">
+                            <label for="toggle-strength">Rel. Strength (3)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        
-        <div class="controls">
-            <button class="btn" onclick="refreshData()" id="refreshBtn">
-                Refresh Data
-            </button>
-            <span class="status-text" id="statusText">
-                No data loaded
-            </span>
+        <div class="navbar-right">
+            <span class="status-badge" id="statusText">No data loaded</span>
         </div>
-        
-        <div class="message" id="message"></div>
-        
-        <div class="loading" id="loading">
+    </nav>
+    
+    <div class="filters-bar" id="filtersBar">
+        <span class="filters-label">
+            <span>Active Filters</span>
+            <span style="background: #667eea; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem;" id="filterCount">0</span>
+        </span>
+        <div class="filter-chips" id="filterChips"></div>
+        <button class="clear-all-btn" onclick="clearAllFilters()">Clear All</button>
+    </div>
+    
+    <div class="message" id="message"></div>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
             <div class="spinner"></div>
-            <p>Fetching and processing stock data...</p>
-            <p>This may take several minutes...</p>
+            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">Processing stock data...</p>
+            <p style="color: #666;">This may take several minutes</p>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="table-controls">
+            <div id="tableLength"></div>
+            <div id="tableFilter"></div>
         </div>
         
-        <div id="tableContainer" style="overflow-x: auto; padding: 20px;">
-<table id="stockTable" style="font-size: 0.85rem;">
-    <thead>
-        <tr>
-            <th onclick="sortTable(0)">Stock Name</th>
-            <th onclick="sortTable(1)">Price</th>
-            <th onclick="sortTable(2)">1D %</th>
-            <th onclick="sortTable(3)">5D %</th>
-            <th onclick="sortTable(4)">RSI</th>
-            <th onclick="sortTable(5)">MACD</th>
-            <th onclick="sortTable(6)">SuperTrend</th>
-            <th onclick="sortTable(7)">SMA50</th>
-            <th onclick="sortTable(8)">SMA200</th>
-            <th onclick="sortTable(9)">GC/DC</th>
-            <th onclick="sortTable(10)">Vol %</th>
-            <th onclick="sortTable(11)">MFI</th>
-            <th onclick="sortTable(12)">CMF</th>
-            <th onclick="sortTable(13)">RelStr 55D</th>
-            <th onclick="sortTable(14)">Sector</th>
-        </tr>
-    </thead>
-    <tbody id="stockData">
-        <tr>
-            <td colspan="15" style="text-align: center; padding: 40px;">
-                No data loaded. Click "Refresh Data" to fetch stocks.
-            </td>
-        </tr>
-    </tbody>
-</table>
+        <div class="table-container">
+            <table id="stockTable">
+                <thead>
+                    <tr>
+                        <th class="col-basic">
+                            <div class="th-content"><span class="th-line1">Stock</span><span class="th-line2">Name</span></div>
+                        </th>
+                        <th class="col-basic">
+                            <div class="th-content"><span class="th-line1">Sector</span></div>
+                            <span class="filter-icon" data-col="1"></span>
+                        </th>
+                        <th class="col-basic">
+                            <div class="th-content"><span class="th-line1">Industry</span></div>
+                            <span class="filter-icon" data-col="2"></span>
+                        </th>
+                        <th class="col-price num">
+                            <div class="th-content"><span class="th-line1">Price</span><span class="th-line2">(₹)</span></div>
+                            <span class="filter-icon" data-col="3"></span>
+                        </th>
+                        <th class="col-price num">
+                            <div class="th-content"><span class="th-line1">1Day</span><span class="th-line2">%</span></div>
+                            <span class="filter-icon" data-col="4"></span>
+                        </th>
+                        <th class="col-price num">
+                            <div class="th-content"><span class="th-line1">5Day</span><span class="th-line2">%</span></div>
+                            <span class="filter-icon" data-col="5"></span>
+                        </th>
+                        <th class="col-price num">
+                            <div class="th-content"><span class="th-line1">11Day</span><span class="th-line2">%</span></div>
+                            <span class="filter-icon" data-col="6"></span>
+                        </th>
+                        <th class="col-price num">
+                            <div class="th-content"><span class="th-line1">P/E</span><span class="th-line2">Ratio</span></div>
+                            <span class="filter-icon" data-col="7"></span>
+                        </th>
+                        <th class="col-trend num">
+                            <div class="th-content"><span class="th-line1">SuperTrend</span><span class="th-line2">1D</span></div>
+                            <span class="filter-icon" data-col="8"></span>
+                        </th>
+                        <th class="col-trend num">
+                            <div class="th-content"><span class="th-line1">SuperTrend</span><span class="th-line2">1W</span></div>
+                            <span class="filter-icon" data-col="9"></span>
+                        </th>
+                        <th class="col-trend num">
+                            <div class="th-content"><span class="th-line1">SMA50</span><span class="th-line2">1D</span></div>
+                            <span class="filter-icon" data-col="10"></span>
+                        </th>
+                        <th class="col-trend num">
+                            <div class="th-content"><span class="th-line1">SMA50</span><span class="th-line2">Away%</span></div>
+                            <span class="filter-icon" data-col="11"></span>
+                        </th>
+                        <th class="col-trend num">
+                            <div class="th-content"><span class="th-line1">SMA200</span><span class="th-line2">1D</span></div>
+                            <span class="filter-icon" data-col="12"></span>
+                        </th>
+                        <th class="col-trend num">
+                            <div class="th-content"><span class="th-line1">SMA200</span><span class="th-line2">Away%</span></div>
+                            <span class="filter-icon" data-col="13"></span>
+                        </th>
+                        <th class="col-trend num">
+                            <div class="th-content"><span class="th-line1">SMA200</span><span class="th-line2">1W</span></div>
+                            <span class="filter-icon" data-col="14"></span>
+                        </th>
+                        <th class="col-trend">
+                            <div class="th-content"><span class="th-line1">GC/DC</span></div>
+                            <span class="filter-icon" data-col="15"></span>
+                        </th>
+                        <th class="col-momentum num">
+                            <div class="th-content"><span class="th-line1">RSI</span><span class="th-line2">1D</span></div>
+                            <span class="filter-icon" data-col="16"></span>
+                        </th>
+                        <th class="col-momentum num">
+                            <div class="th-content"><span class="th-line1">RSI</span><span class="th-line2">1W</span></div>
+                            <span class="filter-icon" data-col="17"></span>
+                        </th>
+                        <th class="col-momentum num">
+                            <div class="th-content"><span class="th-line1">MACD</span><span class="th-line2">1D</span></div>
+                            <span class="filter-icon" data-col="18"></span>
+                        </th>
+                        <th class="col-momentum num">
+                            <div class="th-content"><span class="th-line1">MACD Sig</span><span class="th-line2">1D</span></div>
+                            <span class="filter-icon" data-col="19"></span>
+                        </th>
+                        <th class="col-momentum">
+                            <div class="th-content"><span class="th-line1">Cross</span><span class="th-line2">1D</span></div>
+                            <span class="filter-icon" data-col="20"></span>
+                        </th>
+                        <th class="col-momentum num">
+                            <div class="th-content"><span class="th-line1">MACD</span><span class="th-line2">1W</span></div>
+                            <span class="filter-icon" data-col="21"></span>
+                        </th>
+                        <th class="col-momentum num">
+                            <div class="th-content"><span class="th-line1">MACD Sig</span><span class="th-line2">1W</span></div>
+                            <span class="filter-icon" data-col="22"></span>
+                        </th>
+                        <th class="col-momentum">
+                            <div class="th-content"><span class="th-line1">Cross</span><span class="th-line2">1W</span></div>
+                            <span class="filter-icon" data-col="23"></span>
+                        </th>
+                        <th class="col-volume num">
+                            <div class="th-content"><span class="th-line1">Vol</span><span class="th-line2">Change%</span></div>
+                            <span class="filter-icon" data-col="24"></span>
+                        </th>
+                        <th class="col-volume num">
+                            <div class="th-content"><span class="th-line1">RelVol</span><span class="th-line2">1D/10D</span></div>
+                            <span class="filter-icon" data-col="25"></span>
+                        </th>
+                        <th class="col-volume num">
+                            <div class="th-content"><span class="th-line1">RelVol</span><span class="th-line2">1D/30D</span></div>
+                            <span class="filter-icon" data-col="26"></span>
+                        </th>
+                        <th class="col-volume num">
+                            <div class="th-content"><span class="th-line1">RelVol</span><span class="th-line2">10D/30D</span></div>
+                            <span class="filter-icon" data-col="27"></span>
+                        </th>
+                        <th class="col-volume num">
+                            <div class="th-content"><span class="th-line1">RelVol</span><span class="th-line2">10D/60D</span></div>
+                            <span class="filter-icon" data-col="28"></span>
+                        </th>
+                        <th class="col-volume num">
+                            <div class="th-content"><span class="th-line1">RelVol</span><span class="th-line2">10D/90D</span></div>
+                            <span class="filter-icon" data-col="29"></span>
+                        </th>
+                        <th class="col-money-flow num">
+                            <div class="th-content"><span class="th-line1">MFI</span></div>
+                            <span class="filter-icon" data-col="30"></span>
+                        </th>
+                        <th class="col-money-flow num">
+                            <div class="th-content"><span class="th-line1">CMF</span></div>
+                            <span class="filter-icon" data-col="31"></span>
+                        </th>
+                        <th class="col-money-flow num">
+                            <div class="th-content"><span class="th-line1">B/S</span><span class="th-line2">Pressure</span></div>
+                            <span class="filter-icon" data-col="32"></span>
+                        </th>
+                        <th class="col-money-flow num">
+                            <div class="th-content"><span class="th-line1">VPT</span><span class="th-line2">11D%</span></div>
+                            <span class="filter-icon" data-col="33"></span>
+                        </th>
+                        <th class="col-strength num">
+                            <div class="th-content"><span class="th-line1">RelStr</span><span class="th-line2">18D</span></div>
+                            <span class="filter-icon" data-col="34"></span>
+                        </th>
+                        <th class="col-strength num">
+                            <div class="th-content"><span class="th-line1">RelStr</span><span class="th-line2">55D</span></div>
+                            <span class="filter-icon" data-col="35"></span>
+                        </th>
+                        <th class="col-strength num">
+                            <div class="th-content"><span class="th-line1">RelStr</span><span class="th-line2">81D</span></div>
+                            <span class="filter-icon" data-col="36"></span>
+                        </th>
+                        <th class="col-price num">
+                            <div class="th-content"><span class="th-line1">52W</span><span class="th-line2">High</span></div>
+                            <span class="filter-icon" data-col="37"></span>
+                        </th>
+                        <th class="col-price num">
+                            <div class="th-content"><span class="th-line1">52W</span><span class="th-line2">Low</span></div>
+                            <span class="filter-icon" data-col="38"></span>
+                        </th>
+                        <th class="col-price num">
+                            <div class="th-content"><span class="th-line1">5Year</span><span class="th-line2">High</span></div>
+                            <span class="filter-icon" data-col="39"></span>
+                        </th>
+                        <th class="col-price num">
+                            <div class="th-content"><span class="th-line1">5Year</span><span class="th-line2">Low</span></div>
+                            <span class="filter-icon" data-col="40"></span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="stockData">
+                    <tr>
+                        <td colspan="41" style="text-align:center;padding:60px;color:#999;">
+                            <div style="font-size:1.2rem;margin-bottom:10px;">No data loaded</div>
+                            <div>Click "Refresh Data" to fetch stocks</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="table-footer">
+            <div id="tableInfo"></div>
+            <div id="tablePaginate"></div>
         </div>
     </div>
 
-    <script>
-        let stockData = [];
-        
-        function showMessage(text, type = 'success') {
-            const messageEl = document.getElementById('message');
-            messageEl.textContent = text;
-            messageEl.className = `message show ${type}`;
-            setTimeout(() => messageEl.classList.remove('show'), 5000);
-        }
-        
-        async function refreshData() {
-            const btn = document.getElementById('refreshBtn');
-            const loading = document.getElementById('loading');
-            
-            btn.disabled = true;
-            loading.classList.add('show');
-            
-            try {
-                const response = await fetch('/api/refresh', { method: 'POST' });
-                const result = await response.json();
-                
-                if (result.success) {
-                    showMessage(result.message, 'success');
-                    await loadStocks();
-                } else {
-                    showMessage(result.message, 'error');
-                }
-            } catch (error) {
-                showMessage('Error: ' + error.message, 'error');
-            } finally {
-                btn.disabled = false;
-                loading.classList.remove('show');
-            }
-        }
-        
-        async function loadStocks() {
-            try {
-                const response = await fetch('/api/stocks');
-                const result = await response.json();
-                
-                if (result.success) {
-                    stockData = result.data;
-                    displayStocks(stockData);
-                    updateStatus(result);
-                }
-            } catch (error) {
-                showMessage('Error loading stocks: ' + error.message, 'error');
-            }
-        }
-        
-function displayStocks(stocks) {
-    const tbody = document.getElementById('stockData');
-    
-    if (!stocks || stocks.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="15" style="text-align: center;">No stocks to display</td></tr>';
-        return;
-    }
-    
-    tbody.innerHTML = stocks.map(stock => `
-        <tr>
-            <td class="stock-name">${stock.Stock_Name || 'N/A'}</td>
-            <td>₹${(stock.Price || 0).toFixed(2)}</td>
-            <td>${(stock.Price_1D_Change_Pct || 0).toFixed(2)}%</td>
-            <td>${(stock.Price_5D_Change_Pct || 0).toFixed(2)}%</td>
-            <td>${(stock.RSI_1D || 0).toFixed(2)}</td>
-            <td>${stock.MACD_Crossover_Signal_1D || 'N/A'}</td>
-            <td>₹${(stock.SuperTrend_1D || 0).toFixed(2)}</td>
-            <td>₹${(stock.SMA50_1D || 0).toFixed(2)}</td>
-            <td>₹${(stock.SMA200_1D || 0).toFixed(2)}</td>
-            <td>${stock.GoldenCross_DeathCross || 'N/A'}</td>
-            <td>${(stock.VolumeChangePct || 0).toFixed(2)}%</td>
-            <td>${(stock.MFI || 0).toFixed(2)}</td>
-            <td>${(stock.CMF || 0).toFixed(2)}</td>
-            <td>${(stock.RelStrength_55D || 0).toFixed(2)}</td>
-            <td>${stock.Sector || 'N/A'}</td>
-        </tr>
-    `).join('');
-}
-        
-        function updateStatus(result) {
-            document.getElementById('statusText').textContent = 
-                `Loaded ${result.data.length} stocks | Last update: ${new Date(result.last_update).toLocaleString()}`;
-        }
-        
-        function sortTable(columnIndex) {
-            // Basic sorting - will be enhanced in Step 9
-            alert('Sorting will be implemented in Step 9 with DataTables.js');
-        }
-        
-        // Load stocks on page load
-        window.addEventListener('DOMContentLoaded', loadStocks);
-    </script>
+    <script src="/static/js/screener.js"></script>
 </body>
 </html>
