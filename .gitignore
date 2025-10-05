@@ -52,3 +52,4 @@ Thumbs.db
 
 # Config (if contains sensitive data)
 # config.json
+.env
